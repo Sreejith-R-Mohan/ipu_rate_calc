@@ -1,4 +1,3 @@
-// Define IPU per metric unit data for all 40 services
 const ipuData = {
     "Advanced Data Integration": {
         "Per Hour": 0.19
@@ -21,50 +20,50 @@ const ipuData = {
     "Application Ingestion and Replication": {
         "Per Gigabyte": {
             "(0, 2000)": 0.1,
-            "(2000, 10000)": 0.08,
-            "(10000, 25000)": 0.05,
-            "(25000, inf)": 0.018
+            "(2001, 10000)": 0.08,
+            "(10001, 25000)": 0.05,
+            "(25001, Infinity)": 0.018
         }
     },
     "Application Ingestion and Replication - Change Data Capture": {
         "Per Million Rows": {
             "(0, 10000000)": 6.00,
-            "(10000000, inf)": 0.2
+            "(10000001, Infinity)": 0.2
         }
     },
     "Application Integration": {
         "Per Hour": {
             "(0, 60)": 1.38,
-            "(60, 1200)": 0.17,
-            "(1200, 120000)": 0.043
+            "(61, 1200)": 0.17,
+            "(1201, 120000)": 0.043
         }
     },
     "Application Integration with Advanced Serverless": {
         "Per Hour": {
             "(0, 60)": 2.38,
-            "(60, 1200)": 0.30,
-            "(1200, 20000)": 0.074,
-            "(20000, 50000)": 0.067,
-            "(50000, 100000)": 0.053,
-            "(100000, inf)": 0.021
+            "(61, 1200)": 0.30,
+            "(1201, 20000)": 0.074,
+            "(20001, 50000)": 0.067,
+            "(50001, 100000)": 0.053,
+            "(100001, Infinity)": 0.021
         }
     },
     "Data Integration": {
         "Per Hour": {
             "(0, 2000)": 0.16,
-            "(2000, inf)": 0.025
+            "(2001, Infinity)": 0.025
         }
     },
     "Data Integration with Advanced Serverless": {
         "Per Hour": {
             "(0, 2000)": 0.28,
-            "(2000, inf)": 0.10
+            "(2001, Infinity)": 0.10
         }
     },
     "Data Quality": {
         "Per Hour": {
             "(0, 2000)": 0.38,
-            "(2000, inf)": 0.152
+            "(2001, Infinity)": 0.152
         }
     },
     "Data Quality with Advanced Serverless": {
@@ -79,15 +78,15 @@ const ipuData = {
     "Data Ingestion": {
         "Per Gigabyte": {
             "(0, 5000)": 0.12,
-            "(5000, 20000)": 0.1,
-            "(20000, inf)": 0.08
+            "(5001, 20000)": 0.1,
+            "(20001, Infinity)": 0.08
         }
     },
     "Data Ingestion with Advanced Serverless": {
         "Per Gigabyte": {
             "(0, 5000)": 0.15,
-            "(5000, 20000)": 0.12,
-            "(20000, inf)": 0.10
+            "(5001, 20000)": 0.12,
+            "(20001, Infinity)": 0.10
         }
     },
     "Real-Time Data Integration": {
@@ -147,13 +146,13 @@ const ipuData = {
     "File Ingestion and Replication": {
         "Per Gigabyte": {
             "(0, 5000)": 0.14,
-            "(5000, inf)": 0.07
+            "(5001, Infinity)": 0.07
         }
     },
     "File Ingestion and Replication with Advanced Serverless": {
         "Per Gigabyte": {
             "(0, 5000)": 0.18,
-            "(5000, inf)": 0.10
+            "(5001, Infinity)": 0.10
         }
     },
     "Hybrid Integration": {
@@ -164,54 +163,214 @@ const ipuData = {
     }
 };
 
-// Handle form submission and IPU calculation
-document.getElementById("ipu-form").addEventListener("submit", function(event) {
-    event.preventDefault();
+let totalIPU = 0; // Initialize total IPU
 
-    // Get input values
-    const serviceType = document.getElementById("service_type").value;
-    const scalerValue = parseFloat(document.getElementById("scaler_value").value);
-    const metricUnit = document.getElementById("metric_unit").value;
+// Function to populate the table
+function populateTable() {
+    const tableBody = document.getElementById("ipu-table").querySelector("tbody");
+    tableBody.innerHTML = ""; // Clear the table
 
-    // Validate inputs
-    if (!serviceType || !scalerValue || !metricUnit) {
-        document.getElementById("result").innerText = "Please fill in all fields.";
-        return;
-    }
+    let maxRanges = 0;
 
-    // Calculate IPU Consumption
-    const result = calculateIPUConsumption(serviceType, scalerValue, metricUnit);
-
-    // Display result
-    document.getElementById("result").innerText = result;
-});
-
-// Function to calculate IPU consumption based on selected service
-function calculateIPUConsumption(serviceType, scalerValue, metricUnit) {
-    // Check if the service exists in the data
-    if (!ipuData[serviceType]) {
-        return "Invalid service type.";
-    }
-
-    const serviceData = ipuData[serviceType];
-    
-    // Check if the metric unit exists for this service
-    if (!serviceData[metricUnit]) {
-        return "Invalid metric unit for this service.";
-    }
-
-    // Handle range-based pricing for certain services (e.g., Per Gigabyte)
-    if (typeof serviceData[metricUnit] === "object") {
-        const ranges = serviceData[metricUnit];
-        for (const range in ranges) {
-            const [lower, upper] = range.replace(/[()]/g, "").split(",").map(Number);
-            if (scalerValue >= lower && scalerValue < upper) {
-                return `IPU Consumption: ${scalerValue * ranges[range]}`;
+    // Find the maximum number of ranges across all services
+    for (const service in ipuData) {
+        for (const metricUnit in ipuData[service]) {
+            const rateData = ipuData[service][metricUnit];
+            if (typeof rateData === "object") {
+                maxRanges = Math.max(maxRanges, Object.keys(rateData).length);
             }
         }
-        return "Scaler value out of expected range.";
     }
 
-    // For fixed pricing
-    return `IPU Consumption: ${scalerValue * serviceData[metricUnit]}`;
+    // Adjust the table header based on the maxRanges
+    adjustTableHeader(maxRanges);
+
+    // Create rows for each service
+    for (const service in ipuData) {
+        const serviceData = ipuData[service];
+
+        for (const metricUnit in serviceData) {
+            const rateData = serviceData[metricUnit];
+            const row = document.createElement("tr");
+
+            // Service Name
+            row.appendChild(createCell(service));
+
+            // Metric Unit
+            row.appendChild(createCell(metricUnit));
+
+            // Input Value (Number Input)
+            const inputCell = document.createElement("td");
+            const input = document.createElement("input");
+            input.type = "number";
+            input.min = "0";
+            input.dataset.service = service;
+            input.dataset.metric = metricUnit;
+            inputCell.appendChild(input);
+            row.appendChild(inputCell);
+
+            // Rate Ranges
+            if (typeof rateData === "object") {
+                let rangeCount = 0;
+                for (const range in rateData) {
+                    row.appendChild(createCell(`${range}: ${rateData[range]}`));
+                    rangeCount++;
+                }
+                // Fill empty cells for missing ranges
+                for (let i = rangeCount; i < maxRanges; i++) {
+                    row.appendChild(createCell(""));
+                }
+            } else {
+                // Single Rate
+                const rateCell = document.createElement("td");
+                rateCell.textContent = `All Values: ${rateData}`;
+                rateCell.colSpan = maxRanges; // Span across all range columns
+                row.appendChild(rateCell);
+            }
+
+            // IPU Consumption (Initial value is 0.00, to be calculated later)
+            row.appendChild(createCell("0.00"));
+
+            tableBody.appendChild(row);
+        }
+    }
 }
+
+// Helper function to create a table cell
+function createCell(content) {
+    const cell = document.createElement("td");
+    cell.textContent = content;
+    return cell;
+}
+
+// Adjust the table header to match the maximum ranges
+function adjustTableHeader(maxRanges) {
+    const headerRow = document.querySelector("#ipu-table thead tr");
+    const rangeHeaders = headerRow.querySelectorAll("th");
+
+    // Remove the existing range columns
+    for (let i = 3; i <= 6; i++) {
+        if (rangeHeaders[i]) {
+            rangeHeaders[i].remove();
+        }
+    }
+
+    // Add new headers based on the max number of ranges
+    for (let i = 0; i < maxRanges; i++) {
+        const th = document.createElement("th");
+        th.textContent = `Range ${i + 1}`;
+        headerRow.appendChild(th);
+    }
+
+    // Add IPU Consumption column
+    const th = document.createElement("th");
+    th.textContent = "IPU Consumption";
+    headerRow.appendChild(th);
+}
+
+
+// Function to calculate IPU consumption
+function calculateIPUConsumption(service, metricUnit, inputValue) {
+    // Ensure inputValue is a valid number
+    inputValue = parseFloat(inputValue);
+    if (isNaN(inputValue) || inputValue <= 0) {
+        return "Invalid input";
+    }
+
+    const rateData = ipuData[service] ? ipuData[service][metricUnit] : null;
+    if (!rateData) {
+        return "Rate data not found for this service and metric unit";
+    }
+
+    let ipuConsumption = 0;
+    let remainingValue = inputValue;
+
+    // If there is only one rate (i.e., no range), just multiply inputValue by the rate
+    if (typeof rateData === "number") {
+        ipuConsumption = remainingValue * rateData;
+        return ipuConsumption.toFixed(2);
+    }
+
+    // If there are multiple ranges (rateData is an object), handle each range
+    if (typeof rateData === "object") {
+        // Sort ranges by minimum value
+        const ranges = Object.keys(rateData).sort((a, b) => {
+            const [minA] = a.replace(/[()]/g, "").split(',').map(Number);
+            const [minB] = b.replace(/[()]/g, "").split(',').map(Number);
+            return minA - minB; // Ensure ranges are sorted by minimum value
+        });
+
+        let previousMax = 0; // Keeps track of the last max value processed
+
+        // Process each range
+        for (const range of ranges) {
+            const [min, max] = range.replace(/[()]/g, "").split(',').map((x) => x === "Infinity" ? Infinity : Number(x));
+
+            // If remaining value is in this range, apply the rate
+            if (remainingValue > previousMax) {
+                const startRange = Math.max(previousMax + 1, min);  // Start from the next value after previous max
+                const endRange = Math.min(remainingValue, max); // End at the minimum of remaining value or max of this range
+                const rangeValue = endRange - startRange + 1; // The number of units in this range
+
+                if (rangeValue > 0) {
+                    ipuConsumption += rangeValue * rateData[range];  // Apply rate for this range
+                    remainingValue -= rangeValue;  // Subtract the used portion
+
+                    if (remainingValue <= 0) break;  // No more value to process, exit the loop
+                }
+            }
+
+            previousMax = max; // Update previousMax to the current max value of the range
+        }
+    }
+
+    return ipuConsumption.toFixed(2);
+}
+
+
+
+
+
+
+
+
+// Listen for input changes and update the IPU consumption
+document.querySelector("#ipu-table").addEventListener("input", function (event) {
+    if (event.target.tagName === "INPUT" && event.target.type === "number") {
+        const input = event.target;
+        const service = input.dataset.service;
+        const metricUnit = input.dataset.metric;
+        const inputValue = parseFloat(input.value) || 0;
+
+        // Calculate the IPU consumption based on the input
+        const ipuConsumption = calculateIPUConsumption(service, metricUnit, inputValue);
+
+        // Find the corresponding IPU Consumption cell and update its value
+        const row = input.closest("tr");
+        const ipuCell = row.cells[row.cells.length - 1];
+        ipuCell.textContent = ipuConsumption;
+
+        // Recalculate the total IPU
+        updateTotalIPU();
+    }
+});
+
+
+// Update the total IPU consumption
+function updateTotalIPU() {
+    totalIPU = 0;
+
+    // Loop through each row and sum up the IPU consumption
+    const rows = document.querySelectorAll("#ipu-table tbody tr");
+    rows.forEach(row => {
+        const ipuCell = row.cells[row.cells.length - 1];
+        const ipuValue = parseFloat(ipuCell.textContent) || 0;
+        totalIPU += ipuValue;
+    });
+
+    // Display the total IPU
+    document.getElementById("total-ipu").textContent = totalIPU.toFixed(2);
+}
+
+// Initialize the table
+populateTable();

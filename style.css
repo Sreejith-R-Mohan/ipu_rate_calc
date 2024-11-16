@@ -1,144 +1,160 @@
-/* General Reset */
+/* Resetting and basic styles */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
 }
 
-/* Body Styling */
+/* Body styling */
 body {
-    background-color: #f4f7fb;
-    color: #333;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden;
+    font-family: 'Roboto', sans-serif;
+    background-color: #f7f7f7;
+    margin: 20px;
 }
 
-/* Container Styling */
+/* Container styling */
 .container {
-    background-color: white;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 450px;
-    animation: fadeIn 1s ease-in-out;
-}
-
-/* Title Styling */
-h1 {
+    max-width: 1000px;
+    margin: 0 auto;
     text-align: center;
-    color: #2b2b2b;
-    margin-bottom: 1.5rem;
-    font-size: 1.8rem;
 }
 
-/* Form Styling */
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+/* Heading */
+h1 {
+    font-size: 36px;
+    color: #333;
+    margin-bottom: 20px;
 }
 
-/* Form Group Styling */
-.form-group {
-    display: flex;
-    flex-direction: column;
+/* Table styling */
+#ipu-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-label {
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
+/* Header Styling */
+#ipu-table thead {
+    background-color: #4caf50; /* Teal color */
+    color: white;
 }
 
-select, input {
-    padding: 0.8rem;
-    border-radius: 5px;
+#ipu-table th {
+    padding: 15px;
+    text-align: left;
+    font-size: 16px;
+    border-right: 1px solid #ddd;
+    text-transform: uppercase;
+}
+
+/* Row Styling */
+#ipu-table tbody tr {
+    border-bottom: 1px solid #ddd;
+}
+
+#ipu-table tbody tr:hover {
+    background-color: #e8f5e9; /* Light green background on hover */
+    transform: scale(1.02); /* Slight animation on hover */
+    transition: transform 0.2s ease-in-out;
+}
+
+/* Cell Styling */
+#ipu-table td {
+    padding: 15px;
+    text-align: left;
+    font-size: 14px;
+    border-right: 1px solid #ddd;
+    background-color: #fafafa; /* Light gray background for cells */
+}
+
+#ipu-table input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
     border: 1px solid #ccc;
-    font-size: 1rem;
-    transition: all 0.3s ease;
+    border-radius: 4px;
+    background-color: #f1f1f1;
+    box-sizing: border-box;
+    transition: background-color 0.3s ease;
 }
 
-/* Input Focus Effect */
-select:focus, input:focus {
-    border-color: #0066cc;
-    box-shadow: 0 0 10px rgba(0, 102, 204, 0.3);
+#ipu-table input[type="number"]:focus {
+    outline: none;
+    border-color: #4caf50; /* Green border color on focus */
+    background-color: #fff;
+}
+
+/* Hover effect for inputs */
+#ipu-table input[type="number"]:hover {
+    background-color: #e8f5e9;
 }
 
 /* Button Styling */
-button {
-    background-color: #0066cc;
+.button-container {
+    margin-top: 30px;
+}
+
+.button {
+    padding: 15px 25px;
+    font-size: 18px;
     color: white;
-    padding: 1rem;
-    font-size: 1.1rem;
-    border-radius: 5px;
+    background-color: #4caf50;
     border: none;
+    border-radius: 50px;
     cursor: pointer;
     transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+.button:hover {
+    background-color: #45a049; /* Darker green */
+    transform: scale(1.05); /* Slightly enlarge the button */
+}
+
+.button:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.6); /* Glow effect when focused */
+}
+
+/* Total IPU styling */
+h2 {
+    font-size: 24px;
+    margin-top: 30px;
+}
+
+h2 span {
+    color: #4caf50;
     font-weight: bold;
-}
-
-/* Button Hover Effect */
-button:hover {
-    background-color: #004a99;
-    transform: translateY(-2px);
-}
-
-/* Button Active Effect */
-button:active {
-    transform: translateY(1px);
-}
-
-/* Result Styling */
-.result {
-    margin-top: 2rem;
-    text-align: center;
-    font-size: 1.2rem;
-    color: #333;
-    font-weight: bold;
-    opacity: 0;
-    animation: slideIn 0.6s forwards;
-}
-
-/* Fade In Animation */
-@keyframes fadeIn {
-    0% {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Slide In Animation for Results */
-@keyframes slideIn {
-    0% {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 /* Responsive Design */
-@media (max-width: 600px) {
-    .container {
-        padding: 1.5rem;
+@media (max-width: 768px) {
+    #ipu-table {
+        font-size: 12px;
     }
 
-    h1 {
-        font-size: 1.5rem;
+    #ipu-table th, #ipu-table td {
+        padding: 10px;
     }
 
-    button {
-        padding: 0.8rem;
-        font-size: 1rem;
+    #ipu-table input[type="number"] {
+        font-size: 12px;
+        padding: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    #ipu-table {
+        font-size: 10px;
+    }
+
+    #ipu-table th, #ipu-table td {
+        padding: 8px;
+    }
+
+    #ipu-table input[type="number"] {
+        font-size: 10px;
+        padding: 6px;
     }
 }

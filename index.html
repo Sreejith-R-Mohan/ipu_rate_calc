@@ -7,82 +7,33 @@
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-
     <div class="container">
         <h1>IPU Consumption Calculator</h1>
+        <table id="ipu-table">
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Metric Unit</th>
+                    <th>Input Value</th>
+                    <th>Range 1</th>
+                    <th>Range 2</th>
+                    <th>Range 3</th>
+                    <th>Range 4</th> 
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
 
-        <!-- Form for inputs -->
-        <form id="ipu-form">
-            <div class="form-group">
-                <label for="service_type">Choose a Service:</label>
-                <select id="service_type" required>
-                    <option value="">Select a service</option>
-                    <option value="Advanced Data Integration">Advanced Data Integration</option>
-                    <option value="Advanced Data Integration with Advanced Serverless">Advanced Data Integration with Advanced Serverless</option>
-                    <option value="Advanced Data Quality">Advanced Data Quality</option>
-                    <option value="Advanced Data Quality with Advanced Serverless">Advanced Data Quality with Advanced Serverless</option>
-                    <option value="API Center">API Center</option>
-                    <option value="API Management">API Management</option>
-                    <option value="Application Ingestion and Replication">Application Ingestion and Replication</option>
-                    <option value="Application Ingestion and Replication - Change Data Capture">Application Ingestion and Replication - Change Data Capture</option>
-                    <option value="Application Integration">Application Integration</option>
-                    <option value="Application Integration with Advanced Serverless">Application Integration with Advanced Serverless</option>
-                    <option value="Data Integration">Data Integration</option>
-                    <option value="Data Integration with Advanced Serverless">Data Integration with Advanced Serverless</option>
-                    <option value="Data Quality">Data Quality</option>
-                    <option value="Data Quality with Advanced Serverless">Data Quality with Advanced Serverless</option>
-                    <option value="Batch Data Integration">Batch Data Integration</option>
-                    <option value="Batch Data Integration with Advanced Serverless">Batch Data Integration with Advanced Serverless</option>
-                    <option value="Data Ingestion">Data Ingestion</option>
-                    <option value="Data Ingestion with Advanced Serverless">Data Ingestion with Advanced Serverless</option>
-                    <option value="Real-Time Data Integration">Real-Time Data Integration</option>
-                    <option value="Real-Time Data Integration with Advanced Serverless">Real-Time Data Integration with Advanced Serverless</option>
-                    <option value="Cloud Data Replication">Cloud Data Replication</option>
-                    <option value="Cloud Data Replication with Advanced Serverless">Cloud Data Replication with Advanced Serverless</option>
-                    <option value="Cloud Data Sync">Cloud Data Sync</option>
-                    <option value="Cloud Data Sync with Advanced Serverless">Cloud Data Sync with Advanced Serverless</option>
-                    <option value="Data Governance">Data Governance</option>
-                    <option value="Data Governance with Advanced Serverless">Data Governance with Advanced Serverless</option>
-                    <option value="Streaming Data Integration">Streaming Data Integration</option>
-                    <option value="Streaming Data Integration with Advanced Serverless">Streaming Data Integration with Advanced Serverless</option>
-                    <option value="Data Enrichment">Data Enrichment</option>
-                    <option value="Data Enrichment with Advanced Serverless">Data Enrichment with Advanced Serverless</option>
-                    <option value="Data Warehousing Integration">Data Warehousing Integration</option>
-                    <option value="Data Warehousing Integration with Advanced Serverless">Data Warehousing Integration with Advanced Serverless</option>
-                    <option value="Big Data Integration">Big Data Integration</option>
-                    <option value="Big Data Integration with Advanced Serverless">Big Data Integration with Advanced Serverless</option>
-                    <option value="Cloud ETL Integration">Cloud ETL Integration</option>
-                    <option value="Cloud ETL Integration with Advanced Serverless">Cloud ETL Integration with Advanced Serverless</option>
-                    <option value="File Ingestion and Replication">File Ingestion and Replication</option>
-                    <option value="File Ingestion and Replication with Advanced Serverless">File Ingestion and Replication with Advanced Serverless</option>
-                    <option value="Hybrid Integration">Hybrid Integration</option>
-                    <option value="Hybrid Integration with Advanced Serverless">Hybrid Integration with Advanced Serverless</option>
-                </select>
-            </div>
+        <!-- Calculate button -->
+        <div class="button-container">
+            <button id="calculate-total" class="button">Calculate Total</button>
+        </div>
 
-            <div class="form-group">
-                <label for="scaler_value">Enter Scalar Value:</label>
-                <input type="number" id="scaler_value" step="any" required>
-            </div>
-
-            <div class="form-group">
-                <label for="metric_unit">Choose Metric Unit:</label>
-                <select id="metric_unit" required>
-                    <option value="">Select a metric unit</option>
-                    <option value="Per Hour">Per Hour</option>
-                    <option value="Per Million API">Per Million API</option>
-                    <option value="Per Gigabyte">Per Gigabyte</option>
-                    <option value="Per Million Rows">Per Million Rows</option>
-                </select>
-            </div>
-
-            <button type="submit">Calculate IPU Consumption</button>
-        </form>
-
-        <!-- Result display -->
-        <div id="result" class="result"></div>
+        <!-- Total IPU display -->
+        <h2>Total Estimated IPU: <span id="total-ipu">0</span></h2>
     </div>
 
+    <!-- JavaScript -->
     <script src="./app.js"></script>
 </body>
 </html>
