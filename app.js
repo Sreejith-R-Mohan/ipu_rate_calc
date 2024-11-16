@@ -285,53 +285,41 @@ function calculateIPUConsumption(service, metricUnit, inputValue) {
     let ipuConsumption = 0;
     let remainingValue = inputValue;
 
-    // If there is only one rate (i.e., no range), just multiply inputValue by the rate
     if (typeof rateData === "number") {
+        // Flat rate: directly multiply inputValue by the rate
         ipuConsumption = remainingValue * rateData;
         return ipuConsumption.toFixed(2);
     }
 
-    // If there are multiple ranges (rateData is an object), handle each range
     if (typeof rateData === "object") {
-        // Sort ranges by minimum value
-        const ranges = Object.keys(rateData).sort((a, b) => {
-            const [minA] = a.replace(/[()]/g, "").split(',').map(Number);
-            const [minB] = b.replace(/[()]/g, "").split(',').map(Number);
-            return minA - minB; // Ensure ranges are sorted by minimum value
-        });
+        // Handle multiple ranges
+        const ranges = Object.keys(rateData);
 
-        let previousMax = 0; // Keeps track of the last max value processed
+        for (let i = 0; i < ranges.length; i++) {
+            const range = ranges[i];
+            const [min, max] = range
+                .replace(/[()]/g, "")
+                .split(",")
+                .map(Number); // Convert range to numbers
+            const rate = rateData[range];
 
-        // Process each range
-        for (const range of ranges) {
-            const [min, max] = range.replace(/[()]/g, "").split(',').map((x) => x === "Infinity" ? Infinity : Number(x));
+            if (remainingValue <= 0) break; // Stop if no value remains to be processed
 
-            // If remaining value is in this range, apply the rate
-            if (remainingValue > previousMax) {
-                const startRange = Math.max(previousMax + 1, min);  // Start from the next value after previous max
-                const endRange = Math.min(remainingValue, max); // End at the minimum of remaining value or max of this range
-                const rangeValue = endRange - startRange + 1; // The number of units in this range
-
-                if (rangeValue > 0) {
-                    ipuConsumption += rangeValue * rateData[range];  // Apply rate for this range
-                    remainingValue -= rangeValue;  // Subtract the used portion
-
-                    if (remainingValue <= 0) break;  // No more value to process, exit the loop
-                }
+            if (remainingValue > max - min) {
+                // Full range consumption
+                ipuConsumption += (max - min) * rate;
+                remainingValue -= max - min;
+            } else {
+                // Partial range consumption
+                ipuConsumption += remainingValue * rate;
+                remainingValue = 0; // All value consumed
             }
-
-            previousMax = max; // Update previousMax to the current max value of the range
         }
+        return ipuConsumption.toFixed(2);
     }
 
-    return ipuConsumption.toFixed(2);
+    return "Unexpected data format";
 }
-
-
-
-
-
-
 
 
 // Listen for input changes and update the IPU consumption
