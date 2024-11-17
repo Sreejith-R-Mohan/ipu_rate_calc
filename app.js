@@ -369,34 +369,30 @@ function generateReport() {
     let reportData = [];
     let headerRow = ['"Service"', '"Metric Unit"', '"Input Value"'];
 
-    // Loop through the services to determine the maximum number of ranges
-    let maxRanges = 0;
-    for (const row of rows) {
-        const rangeCells = row.querySelectorAll("td:nth-child(n+4):nth-child(-n+7)"); // Range columns
-        maxRanges = Math.max(maxRanges, rangeCells.length);
-    }
+    // Define the maximum number of ranges (in your case, it seems to be 6)
+    const maxRanges = 6;
 
-    // Add header row for the ranges
+    // Add header row for the ranges (Range 1 to Range 6)
     for (let i = 1; i <= maxRanges; i++) {
         headerRow.push(`"Range ${i} (Start, End, Rate)"`);
     }
-    headerRow.push('"IPU Consumption"');
+    headerRow.push('"IPU Consumption"'); // Add the IPU Consumption header
 
     // Add the header row to the report
     reportData.push(headerRow.join(","));
 
     // Loop through each row and extract data
     rows.forEach(row => {
-        const service = row.cells[0].textContent;
-        const metricUnit = row.cells[1].textContent;
-        const inputValue = row.cells[2].querySelector("input").value;
-        const ipuConsumption = row.cells[row.cells.length - 1].textContent;
+        const service = row.cells[0]?.textContent.trim() || '';
+        const metricUnit = row.cells[1]?.textContent.trim() || '';
+        const inputValue = row.cells[2]?.querySelector("input")?.value || '';
+        const ipuConsumption = row.cells[row.cells.length - 1]?.textContent.trim() || '0';
 
         // Initialize row data
         let rowData = [`"${service}"`, `"${metricUnit}"`, `"${inputValue}"`];
 
         // Add range data (if any)
-        const rateData = ipuData[service][metricUnit];
+        const rateData = ipuData[service]?.[metricUnit] || {};  // Assuming ipuData is available
         if (typeof rateData === "object") {
             const ranges = Object.keys(rateData);
 
@@ -405,11 +401,10 @@ function generateReport() {
                 const [min, max] = range.replace(/[()]/g, "").split(",").map(Number);
                 const rate = rateData[range];
 
-                // If only one value exists in the range, set start to 0 and end to Infinity
-                if (min === max) {
-                    rowData.push(`"0 to Infinity : ${rate}"`);
-                } else {
+                if (!isNaN(min) && !isNaN(max)) {
                     rowData.push(`"${min} to ${max} : ${rate}"`);
+                } else {
+                    rowData.push('"Unknown Range"');
                 }
             });
 
@@ -418,10 +413,9 @@ function generateReport() {
                 rowData.push('""'); // Empty cell for missing ranges
             }
         } else {
-            // Single rate - only one column for range
-            rowData.push(`"${rateData}"`);  // Show single rate value in the range column
-            for (let i = 1; i < maxRanges; i++) {
-                rowData.push('""');  // Fill other range columns with empty cells
+            // If there are no ranges, fill all range columns with empty cells
+            for (let i = 0; i < maxRanges; i++) {
+                rowData.push('""');  // Fill all range columns with empty cells
             }
         }
 
@@ -433,8 +427,10 @@ function generateReport() {
     });
 
     // Add total IPU at the end of the report
-    reportData.push('""'); // Empty row to separate data from total
-    reportData.push(['"Total IPU"', '""', '""', '""', '""', `"${totalIPU.toFixed(2)}"`].join(","));
+    const totalRow = Array(headerRow.length).fill('""'); // Create an array of empty strings for each column
+    totalRow[0] = '"Total IPU"'; // Set "Total IPU" in the first cell
+    totalRow[totalRow.length - 1] = `"${totalIPU.toFixed(2)}"`; // Set the total IPU in the last cell
+    reportData.push(totalRow.join(","));
 
     // Convert report data to CSV format
     const csvContent = "data:text/csv;charset=utf-8," + reportData.join("\n");
@@ -446,7 +442,11 @@ function generateReport() {
     link.setAttribute("download", "ipu_report.csv");
     document.body.appendChild(link);
     link.click();
+
+    document.body.removeChild(link); // Clean up DOM after use
 }
+
+
 
 document.getElementById("generate-report").addEventListener("click", generateReport);
 
@@ -454,6 +454,8 @@ document.getElementById("generate-report").addEventListener("click", generateRep
 // Declare a variable for the chart instance
 let ipuChart = null;
 let currentChartType = 'bar'; // Default chart type is 'bar'
+
+
 
 // Create the chart instance
 function createChart() {
@@ -482,6 +484,32 @@ function createChart() {
         ipuChart.destroy();
     }
 
+// Custom plugin for adding an image watermark
+const watermarkImage = new Image();
+watermarkImage.src = './unifiLogo.png'; // Replace with your image path
+
+// Custom plugin for adding an image watermark
+const imageWatermarkPlugin = {
+    id: 'imageWatermark',
+    beforeDraw: (chart) => {
+        const ctx = chart.ctx;
+        const canvas = chart.canvas;
+
+        // Ensure the image is fully loaded before drawing
+        if (watermarkImage.complete) {
+            const x = (canvas.width - watermarkImage.width) / 4; // Adjust position
+            const y = (canvas.height - watermarkImage.height) / 4;
+            ctx.save();
+            ctx.globalAlpha = 0.1; // Make the image transparent
+            ctx.drawImage(watermarkImage, x, y, watermarkImage.width, watermarkImage.height);
+            ctx.restore();
+        }
+    }
+};
+
+// Register the plugin globally
+Chart.register(imageWatermarkPlugin);
+
     // Create the new chart with the selected type
     ipuChart = new Chart(ctx, {
         type: currentChartType, // Use the selected chart type
@@ -501,6 +529,9 @@ function createChart() {
                 y: {
                     beginAtZero: true // Ensures the y-axis starts from 0
                 }
+            },
+            plugins: {
+                watermark: true // Enable the watermark plugin
             }
         }
     });
