@@ -362,3 +362,6 @@ function updateTotalIPU() {
 
 // Initialize the table
 populateTable();
+
+
+

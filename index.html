@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>IPU Consumption Calculator</title>
     <link rel="stylesheet" href="./style.css">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Poppins:wght@400;500&display=swap" rel="stylesheet">
+
 </head>
 <body>
     <div class="container">
@@ -26,14 +31,51 @@
 
         <!-- Calculate button -->
         <div class="button-container">
-            <button id="calculate-total" class="button">Calculate Total</button>
+            <button type="button" class="button"  id="calculate-total">
+                <span class="fold"></span>
+              
+                <div class="points_wrapper">
+                  <i class="point"></i>
+                  <i class="point"></i>
+                  <i class="point"></i>
+                  <i class="point"></i>
+                  <i class="point"></i>
+                  <i class="point"></i>
+                  <i class="point"></i>
+                  <i class="point"></i>
+                  <i class="point"></i>
+                  <i class="point"></i>
+                </div>
+              
+                <span class="inner"
+                  ><svg
+                    class="icon"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2.5"
+                  >
+                    <polyline
+                      points="13.18 1.37 13.18 9.64 21.45 9.64 10.82 22.63 10.82 14.36 2.55 14.36 13.18 1.37"
+                    ></polyline></svg>Calculate Total IPU</span>
+              </button>
+
+            <!-- <button id="generate-pdf" class="button">Download Report</button> -->
         </div>
 
         <!-- Total IPU display -->
         <h2>Total Estimated IPU: <span id="total-ipu">0</span></h2>
+
+
+
     </div>
 
-    <!-- JavaScript -->
-    <script src="./app.js"></script>
+      <!-- JavaScript -->
+     <script src="./app.js"></script>
+      <!-- Bootstrap JS -->
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
