@@ -363,5 +363,184 @@ function updateTotalIPU() {
 // Initialize the table
 populateTable();
 
+// Function to generate a CSV report
+function generateReport() {
+    const rows = document.querySelectorAll("#ipu-table tbody tr");
+    let reportData = [];
+    let headerRow = ['"Service"', '"Metric Unit"', '"Input Value"'];
+
+    // Loop through the services to determine the maximum number of ranges
+    let maxRanges = 0;
+    for (const row of rows) {
+        const rangeCells = row.querySelectorAll("td:nth-child(n+4):nth-child(-n+7)"); // Range columns
+        maxRanges = Math.max(maxRanges, rangeCells.length);
+    }
+
+    // Add header row for the ranges
+    for (let i = 1; i <= maxRanges; i++) {
+        headerRow.push(`"Range ${i} (Start, End, Rate)"`);
+    }
+    headerRow.push('"IPU Consumption"');
+
+    // Add the header row to the report
+    reportData.push(headerRow.join(","));
+
+    // Loop through each row and extract data
+    rows.forEach(row => {
+        const service = row.cells[0].textContent;
+        const metricUnit = row.cells[1].textContent;
+        const inputValue = row.cells[2].querySelector("input").value;
+        const ipuConsumption = row.cells[row.cells.length - 1].textContent;
+
+        // Initialize row data
+        let rowData = [`"${service}"`, `"${metricUnit}"`, `"${inputValue}"`];
+
+        // Add range data (if any)
+        const rateData = ipuData[service][metricUnit];
+        if (typeof rateData === "object") {
+            const ranges = Object.keys(rateData);
+
+            // Loop through the ranges and add each range's data
+            ranges.forEach(range => {
+                const [min, max] = range.replace(/[()]/g, "").split(",").map(Number);
+                const rate = rateData[range];
+
+                // If only one value exists in the range, set start to 0 and end to Infinity
+                if (min === max) {
+                    rowData.push(`"0 to Infinity : ${rate}"`);
+                } else {
+                    rowData.push(`"${min} to ${max} : ${rate}"`);
+                }
+            });
+
+            // Fill empty columns if not all ranges are present
+            for (let i = ranges.length; i < maxRanges; i++) {
+                rowData.push('""'); // Empty cell for missing ranges
+            }
+        } else {
+            // Single rate - only one column for range
+            rowData.push(`"${rateData}"`);  // Show single rate value in the range column
+            for (let i = 1; i < maxRanges; i++) {
+                rowData.push('""');  // Fill other range columns with empty cells
+            }
+        }
+
+        // Add IPU consumption to the row
+        rowData.push(`"${ipuConsumption}"`);
+
+        // Format the row as a CSV line and add to the report
+        reportData.push(rowData.join(","));
+    });
+
+    // Add total IPU at the end of the report
+    reportData.push('""'); // Empty row to separate data from total
+    reportData.push(['"Total IPU"', '""', '""', '""', '""', `"${totalIPU.toFixed(2)}"`].join(","));
+
+    // Convert report data to CSV format
+    const csvContent = "data:text/csv;charset=utf-8," + reportData.join("\n");
+
+    // Create a link and trigger download
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "ipu_report.csv");
+    document.body.appendChild(link);
+    link.click();
+}
+
+document.getElementById("generate-report").addEventListener("click", generateReport);
 
 
+// Declare a variable for the chart instance
+let ipuChart = null;
+let currentChartType = 'bar'; // Default chart type is 'bar'
+
+// Create the chart instance
+function createChart() {
+    // Get table rows (ignoring the header row)
+    const rows = document.querySelectorAll('#ipu-table tbody tr');
+
+    // Arrays to hold service names and IPU consumption values
+    const services = [];
+    const ipuConsumptions = [];
+
+    // Loop through each row and get the data from the last column (IPU Consumption)
+    rows.forEach(row => {
+        // Assuming the service name is in the first column and IPU consumption is in the last column
+        const service = row.cells[0].textContent.trim(); // First column: Service Name
+        const ipuConsumption = parseFloat(row.cells[row.cells.length - 1].textContent) || 0; // Last column: IPU Consumption
+        
+        services.push(service);
+        ipuConsumptions.push(ipuConsumption);
+    });
+
+    // Get the canvas context
+    const ctx = document.getElementById("ipuChart").getContext("2d");
+
+    // If the chart already exists, destroy it before creating a new one
+    if (ipuChart) {
+        ipuChart.destroy();
+    }
+
+    // Create the new chart with the selected type
+    ipuChart = new Chart(ctx, {
+        type: currentChartType, // Use the selected chart type
+        data: {
+            labels: services, // X-axis labels (services)
+            datasets: [{
+                label: 'IPU Consumption',
+                data: ipuConsumptions, // Y-axis values (IPU consumption)
+                backgroundColor: currentChartType === 'pie' || currentChartType === 'doughnut' ? ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'] : 'rgba(75, 192, 192, 0.2)',  // Conditional colors based on chart type
+                borderColor: currentChartType === 'pie' || currentChartType === 'doughnut' ? ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'] : 'rgba(75, 192, 192, 1)',  // Conditional border colors
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: currentChartType === 'pie' || currentChartType === 'doughnut' ? {} : {  // Skip scales for pie and doughnut charts
+                y: {
+                    beginAtZero: true // Ensures the y-axis starts from 0
+                }
+            }
+        }
+    });
+}
+
+// Function to update the chart type when the user selects a different chart type
+function updateChartType() {
+    currentChartType = document.getElementById("chartType").value; // Get the selected chart type
+    updateChart(); // Recreate the chart with the selected type
+}
+
+// Function to update the chart after recalculating IPU
+function updateChart() {
+    createChart(); // Re-create the chart with updated data and the selected type
+}
+
+// Initial chart creation when the page loads
+window.onload = createChart;
+
+// Listen for input changes to update the chart
+document.querySelector("#ipu-table").addEventListener("input", function (event) {
+    if (event.target.tagName === "INPUT" && event.target.type === "number") {
+        // Recalculate the IPU consumption for the row
+        const input = event.target;
+        const service = input.dataset.service;
+        const metricUnit = input.dataset.metric;
+        const inputValue = parseFloat(input.value) || 0;
+
+        // Calculate the new IPU consumption
+        const ipuConsumption = calculateIPUConsumption(service, metricUnit, inputValue);
+
+        // Find the corresponding IPU Consumption cell and update its value
+        const row = input.closest("tr");
+        const ipuCell = row.cells[row.cells.length - 1];
+        ipuCell.textContent = ipuConsumption;
+
+        // Recalculate the total IPU
+        updateTotalIPU();
+
+        // Update the chart after recalculating IPU
+        updateChart();
+    }
+});

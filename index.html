@@ -29,6 +29,8 @@
             <tbody></tbody>
         </table>
 
+
+       
         <!-- Calculate button -->
         <div class="button-container">
             <button type="button" class="button"  id="calculate-total">
@@ -63,19 +65,96 @@
                     ></polyline></svg>Calculate Total IPU</span>
               </button>
 
-            <!-- <button id="generate-pdf" class="button">Download Report</button> -->
+              <button id="generate-report" class="button" type="button"> <span class="fold"></span>
+              
+                <div class="points_wrapper">
+                  <i class="point"></i>
+                  <i class="point"></i>
+                  <i class="point"></i>
+                  <i class="point"></i>
+                  <i class="point"></i>
+                  <i class="point"></i>
+                  <i class="point"></i>
+                  <i class="point"></i>
+                  <i class="point"></i>
+                  <i class="point"></i>
+                </div>
+              
+                <span class="inner"
+                  ><svg
+                    class="icon"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2.5"
+                  >
+                    <polyline
+                      points="13.18 1.37 13.18 9.64 21.45 9.64 10.82 22.63 10.82 14.36 2.55 14.36 13.18 1.37"
+                    ></polyline></svg>Download CSV</span></button>
+                <button onclick="generateChartReport()" class="button">
+                    <span class="fold"></span>
+              
+                    <div class="points_wrapper">
+                      <i class="point"></i>
+                      <i class="point"></i>
+                      <i class="point"></i>
+                      <i class="point"></i>
+                      <i class="point"></i>
+                      <i class="point"></i>
+                      <i class="point"></i>
+                      <i class="point"></i>
+                      <i class="point"></i>
+                      <i class="point"></i>
+                    </div>
+                  
+                    <span class="inner"
+                      ><svg
+                        class="icon"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2.5"
+                      >
+                        <polyline
+                          points="13.18 1.37 13.18 9.64 21.45 9.64 10.82 22.63 10.82 14.36 2.55 14.36 13.18 1.37"
+                        ></polyline></svg>Generate IPU Chart</span>
+                </button>
+                
         </div>
 
         <!-- Total IPU display -->
         <h2>Total Estimated IPU: <span id="total-ipu">0</span></h2>
 
-
-
+        
     </div>
 
+    <div class="chart-dropdown">
+        <label for="chartType">Select Chart Type:</label>
+        <select id="chartType" onchange="updateChartType()">
+            <option value="bar">Bar Chart</option>
+            <option value="line">Line Chart</option>
+            <option value="pie">Pie Chart</option>
+            <option value="radar">Radar Chart</option>
+            <option value="doughnut">Doughnut Chart</option>
+        </select>
+    </div>
+    
+      
+  <!-- The canvas where the chart will be rendered -->
+  <canvas id="ipuChart" width="400" height="200"></canvas>
+  
+</body>
       <!-- JavaScript -->
-     <script src="./app.js"></script>
+      <script src="./app.js"></script>
       <!-- Bootstrap JS -->
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+   
 </html>
